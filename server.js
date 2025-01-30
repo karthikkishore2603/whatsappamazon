@@ -1,6 +1,7 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
+
 // Initialize WhatsApp client with session persistence
 const client = new Client({
     authStrategy: new LocalAuth(),

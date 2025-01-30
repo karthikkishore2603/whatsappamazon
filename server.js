@@ -1,94 +1,42 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode');
-const express = require('express');
-const bodyParser = require('body-parser');
+const { Client, LocalAuth } = require("whatsapp-web.js");
+const qrcode = require("qrcode-terminal");
 
-const app = express();
-let isAuthenticated = false;  // Flag to track authentication status
-
+// Initialize WhatsApp client with session persistence
 const client = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
 });
 
-app.use(bodyParser.json());
-
-let qrCodeUrl = ''; // Store QR Code URL
-
-// Generate QR Code
-client.on('qr', (qr) => {
-    qrcode.toDataURL(qr, (err, url) => {
-        if (err) {
-            console.error("Error generating QR code:", err);
-            return;
-        }
-        qrCodeUrl = url;
-    });
+client.on("qr", (qr) => {
+    console.log("Scan this QR Code to log in:");
+    qrcode.generate(qr, { small: true });
 });
 
-// When WhatsApp is authenticated
-client.on('ready', () => {
-    console.log('WhatsApp is ready!');
-    isAuthenticated = true;
-});
-
-// When WhatsApp logs out
-client.on('disconnected', () => {
-    console.log('WhatsApp Disconnected!');
-    isAuthenticated = false;
-});
-
-// QR Code or Logout Button Page
-app.get('/qr', (req, res) => {
-    if (isAuthenticated) {
-        res.send(`
-            <p>You are already logged in!</p>
-            <form action="/logout" method="POST">
-                <button type="submit">Sign Out</button>
-            </form>
-        `);
-    } else {
-        res.send(`
-            <p>Scan this QR code to log in:</p>
-            <img src="${qrCodeUrl}" alt="QR Code"><br/>
-        `);
-    }
-});
-
-// Logout Route
-app.post('/logout', async (req, res) => {
-    try {
-        await client.logout();
-        isAuthenticated = false;
-        res.send("<p>Logged out successfully! <a href='/qr'>Go back</a></p>");
-    } catch (error) {
-        console.error('Logout failed:', error);
-        res.status(500).send('<p>Error logging out</p>');
-    }
-});
-
-// Send Message API
-app.post('/send-message', async (req, res) => {
-    const { phoneNumber, message } = req.body;
-    if (!phoneNumber || !message) {
-        return res.status(400).send({ error: 'phoneNumber and message are required' });
-    }
-
-    try {
-        const chatId = `${phoneNumber}@c.us`;
-        await client.sendMessage(chatId, message);
-        res.status(200).send({ success: true, message: `Message sent to ${phoneNumber}` });
-    } catch (error) {
-        console.error('Error sending message:', error);
-        res.status(500).send({ error: 'Failed to send message' });
-    }
-});
-
-// Start server
-app.listen(3000, () => {
-    console.log('App running on port 3000');
+client.on("ready", () => {
+    console.log("WhatsApp Web is ready!");
 });
 
 client.initialize();
+
+// Send message function
+const sendMessage = (number, message) => {
+    let chatId = number.includes("@c.us") ? number : number + "@c.us";
+    client.sendMessage(chatId, message)
+        .then(() => console.log("Message sent successfully!"))
+        .catch(err => console.error("Error sending message:", err));
+};
+
+// Expose API endpoint
+const express = require("express");
+const app = express();
+app.use(express.json());
+
+app.post("/send", (req, res) => {
+    const { number, message } = req.body;
+    if (!number || !message) {
+        return res.status(400).json({ error: "Missing number or message" });
+    }
+    sendMessage(number, message);
+    res.json({ success: true, message: "Message sent!" });
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));

@@ -9,9 +9,10 @@ let isAuthenticated = false;  // Flag to track authentication status
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
+        executablePath: '/usr/bin/google-chrome-stable',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
-});
+});;
 
 app.use(bodyParser.json());
 

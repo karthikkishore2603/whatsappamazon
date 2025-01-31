@@ -1,12 +1,12 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const express = require("express");
 
 async function initializeBrowserAndClient() {
     // Launch Puppeteer with no sandbox
     const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium-browser',
+        headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 

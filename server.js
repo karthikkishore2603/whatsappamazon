@@ -14,6 +14,7 @@ const client = new Client({
     }
 });;
 
+console.log('Phase 1');
 app.use(bodyParser.json());
 
 let qrCodeUrl = ''; // Store QR Code URL
@@ -88,8 +89,9 @@ app.post('/send-message', async (req, res) => {
 });
 
 // Start server
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0', () => {
     console.log('App running on port 3000');
 });
+
 
 client.initialize();

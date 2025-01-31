@@ -6,9 +6,11 @@ const express = require("express");
 async function initializeBrowserAndClient() {
     // Launch Puppeteer with no sandbox
     const browser = await puppeteer.launch({
-  executablePath: '/usr/bin/chromium-browser',  // Path to Chromium browser
-  args: ['--no-sandbox', '--disable-setuid-sandbox']
-});
+        executablePath: '/usr/bin/chromium-browser',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    console.log("Browser launched successfully");
 
     // Initialize WhatsApp client with session persistence
     const client = new Client({

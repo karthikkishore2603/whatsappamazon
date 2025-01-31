@@ -6,9 +6,11 @@ const express = require("express");
 async function initializeBrowserAndClient() {
     // Launch Puppeteer with no sandbox
     const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    headless: true,
+    executablePath: '/usr/bin/chromium-browser', // Explicitly use system Chromium
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
+
 
     console.log("Browser launched successfully");
 
